@@ -36,3 +36,401 @@
     transform: rotate(360deg);
   }
 }
+button {
+    margin-right: 10px;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+.report-form {
+    margin-top: 25px;
+    max-width: 500px;
+}
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f3eaf4;
+    color: #3f3045;
+}
+
+nav {
+    width: 100%;
+    margin: 0;
+    padding: 35px 20px 25px;
+    background: #f3eaf4;
+    text-align: center;
+}
+
+nav h2 {
+    margin: 0;
+    color: #633b69;
+    font-size: 32px;
+    text-align: center;
+}
+
+nav p {
+    margin: 10px 0 0;
+    color: #765c78;
+    font-size: 16px;
+    text-align: center;
+}
+
+.search-page {
+    width: 100%;
+    max-width: 950px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 20px 0 60px;
+    align-items: center;
+}
+
+.search-card,
+.report-form,
+.results-section {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 25px;
+    background: #fffafc;
+    border-radius: 22px;
+    padding: 35px;
+    box-shadow: 0 10px 30px rgba(91, 54, 98, 0.1);
+}
+
+.hero-text {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.hero-text h1 {
+    margin: 0 0 10px;
+    color: #633b69;
+    font-size: 30px;
+    text-align: center;
+}
+
+.hero-text p {
+    margin: 0;
+    color: #806b82;
+    text-align: center;
+}
+
+.input-group {
+    width: 100%;
+    margin-bottom: 18px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #59445d;
+}
+
+.input-group input,
+.report-form input,
+.report-form select,
+.report-form textarea {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid #decfe0;
+    border-radius: 11px;
+    background: white;
+    color: #423346;
+    font-size: 15px;
+    outline: none;
+}
+
+.input-group input:focus,
+.report-form input:focus,
+.report-form select:focus,
+.report-form textarea:focus {
+    border-color: #a86baa;
+}
+
+.main-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    margin-top: 25px;
+}
+
+.primary-button,
+.secondary-button {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 11px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.primary-button {
+    background: #8a5a91;
+    color: white;
+}
+
+.primary-button:hover {
+    background: #76477d;
+}
+
+.secondary-button {
+    background: #f2dce9;
+    color: #633b69;
+}
+
+.success-message,
+.error-message {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.success-message {
+    color: #558267;
+}
+
+.error-message {
+    color: #b85c68;
+}
+
+.report-form h2 {
+    margin-top: 0;
+    color: #633b69;
+}
+
+.report-form textarea {
+    min-height: 110px;
+    resize: vertical;
+    margin-bottom: 15px;
+}
+
+.section-heading {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.section-heading h2 {
+    margin: 0 0 7px;
+    color: #633b69;
+}
+
+.section-heading p {
+    margin: 0;
+    color: #806b82;
+}
+
+.routes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.route-card {
+    width: 100%;
+    background: #f8eef7;
+    border: 1px solid #e4d2e3;
+    border-radius: 17px;
+    padding: 20px;
+}
+
+.route-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.route-card h3 {
+    margin: 0;
+    color: #633b69;
+}
+
+.route-badge {
+    padding: 5px 9px;
+    border-radius: 20px;
+    background: #f1d8e7;
+    color: #704875;
+    font-size: 12px;
+}
+
+.route-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.route-info div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.info-label {
+    font-size: 13px;
+    color: #8a748d;
+}
+
+.route-info strong {
+    color: #463649;
+}
+
+.reports-panel {
+    margin-top: 28px;
+    padding-top: 18px;
+}
+
+.reports-toggle {
+    width: 100%;
+    border: 1px solid #decfe0;
+    background: #f4e4ef;
+    color: #633b69;
+    padding: 15px 17px;
+    border-radius: 13px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.report-count {
+    background: #8a5a91;
+    color: white;
+    border-radius: 20px;
+    padding: 3px 9px;
+    font-size: 12px;
+}
+
+.reports-list {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.report-card {
+    width: 100%;
+    background: #fff6f9;
+    border: 1px solid #ead6df;
+    border-radius: 13px;
+    padding: 16px;
+}
+
+.report-location {
+    font-weight: bold;
+    color: #633b69;
+}
+
+.report-problem {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 5px 9px;
+    border-radius: 20px;
+    background: #f1d8e7;
+    color: #704875;
+    font-size: 12px;
+}
+
+.report-card p {
+    margin-bottom: 0;
+    color: #645467;
+}
+
+@media (max-width: 700px) {
+    .search-page {
+        width: 100%;
+        padding: 20px 0 60px;
+        max-width: 950px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .search-card,
+    .report-form,
+    .results-section {
+        padding: 22px;
+    }
+
+    .routes-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .main-buttons {
+        flex-direction: column;
+    }
+
+    .primary-button,
+    .secondary-button {
+        width: 100%;
+    }
+
+    .route-info {
+        flex-direction: column;
+    }
+}
+.map-wrapper {
+    width: 100%;
+    margin: 25px 0;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid #decfe0;
+}
+
+.route-map {
+    width: 100%;
+    height: 450px;
+}
+.map-wrapper {
+    width: 100%;
+    height: 450px;
+    margin: 25px 0 30px;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid #decfe0;
+}
+
+.route-map {
+    width: 100%;
+    height: 100%;
+}
+.route-legend {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: -15px 0 25px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #633b69;
+}
+
+.legend-line {
+    width: 35px;
+    height: 5px;
+    display: inline-block;
+    border-radius: 10px;
+}
+
+.route-one {
+    background: #7b4b84;
+}
+
+.route-two {
+    background: #c36b8b;
+}
