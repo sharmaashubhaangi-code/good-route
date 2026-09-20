@@ -3,19 +3,30 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const { canCreateReport } = require("./cedar");
 
 const app = express();
 
 app.use(express.json());
 app.use(cors());
 
+
+// ==============================
+// MongoDB Connection
+// ==============================
+
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => {
         console.log("MongoDB connected successfully");
     })
     .catch((error) => {
-        console.log("MongoDB connection error:", error);
+        console.log("MongoDB unavailable. Running in local demo mode.");
     });
+
+
+// ==============================
+// Report Schema
+// ==============================
 
 const reportSchema = new mongoose.Schema({
     location: String,
@@ -31,7 +42,19 @@ const reportSchema = new mongoose.Schema({
 
 const Report = mongoose.model("Report", reportSchema);
 
+
+// ==============================
+// Local Demo Storage
+// ==============================
+
+const localReports = [];
+
 const REPORT_RADIUS_KM = 2;
+
+
+// ==============================
+// Geocoding
+// ==============================
 
 let lastGeocodeRequest = 0;
 
@@ -71,6 +94,11 @@ async function geocode(place) {
     };
 }
 
+
+// ==============================
+// Haversine Distance
+// ==============================
+
 function haversineDistance(lat1, lon1, lat2, lon2) {
 
     const earthRadius = 6371;
@@ -91,6 +119,11 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
 
     return earthRadius * c;
 }
+
+
+// ==============================
+// Find Nearest Route Distance
+// ==============================
 
 function findNearestRouteDistance(report, routeGeometry) {
 
@@ -115,6 +148,11 @@ function findNearestRouteDistance(report, routeGeometry) {
 
     return minimumDistance;
 }
+
+
+// ==============================
+// OpenStreetMap Road Information
+// ==============================
 
 async function getOSMRoadInfo(routeGeometry) {
 
@@ -264,6 +302,11 @@ out tags;
     }
 }
 
+
+// ==============================
+// Analyse Route
+// ==============================
+
 function analyseRoute(route, reports) {
 
     const nearbyReports = [];
@@ -313,9 +356,23 @@ function analyseRoute(route, reports) {
     };
 }
 
+
+// ==============================
+// POST /reports
+// ==============================
+
 app.post("/reports", async (req, res) => {
 
     try {
+
+        // Cedar authorization
+        const allowed = await canCreateReport();
+
+        if (!allowed) {
+            return res.status(403).json({
+                message: "Report creation not authorized"
+            });
+        }
 
         const {
             location,
@@ -339,9 +396,36 @@ app.post("/reports", async (req, res) => {
             longitude: coordinates.longitude
         });
 
-        await newReport.save();
 
-        console.log("Report saved:", newReport);
+        // MongoDB available
+        if (mongoose.connection.readyState === 1) {
+
+            await newReport.save();
+
+            console.log("Report saved to MongoDB:", newReport);
+
+        }
+
+        // MongoDB unavailable
+        else {
+
+            const localReport = {
+                _id: new mongoose.Types.ObjectId(),
+
+                location,
+                problem,
+                description,
+
+                latitude: coordinates.latitude,
+                longitude: coordinates.longitude,
+
+                createdAt: new Date()
+            };
+
+            localReports.push(localReport);
+
+            console.log("Report saved in local demo mode:", localReport);
+        }
 
         res.json({
             message: "Report saved successfully"
@@ -357,12 +441,31 @@ app.post("/reports", async (req, res) => {
     }
 });
 
+
+// ==============================
+// GET /reports
+// ==============================
+
 app.get("/reports", async (req, res) => {
 
     try {
 
-        const reports = await Report.find()
-            .sort({ createdAt: -1 });
+        let reports;
+
+        // MongoDB available
+        if (mongoose.connection.readyState === 1) {
+
+            reports = await Report.find()
+                .sort({ createdAt: -1 });
+
+        }
+
+        // MongoDB unavailable
+        else {
+
+            reports = [...localReports].reverse();
+
+        }
 
         res.json(reports);
 
@@ -375,6 +478,11 @@ app.get("/reports", async (req, res) => {
         });
     }
 });
+
+
+// ==============================
+// GET /route
+// ==============================
 
 app.get("/route", async (req, res) => {
 
@@ -391,9 +499,15 @@ app.get("/route", async (req, res) => {
             });
         }
 
+
+        // Geocode start
         const startLocation = await geocode(start);
+
+        // Geocode destination
         const destinationLocation = await geocode(destination);
 
+
+        // OSRM route
         const routeUrl =
             `https://router.project-osrm.org/route/v1/driving/` +
             `${startLocation.longitude},${startLocation.latitude};` +
@@ -412,19 +526,40 @@ app.get("/route", async (req, res) => {
             throw new Error("No route found");
         }
 
-        const reports = await Report.find({
-            latitude: { $exists: true },
-            longitude: { $exists: true }
-        }).lean();
 
+        // Get reports
+        let reports;
+
+        // MongoDB available
+        if (mongoose.connection.readyState === 1) {
+
+            reports = await Report.find({
+                latitude: { $exists: true },
+                longitude: { $exists: true }
+            }).lean();
+
+        }
+
+        // MongoDB unavailable
+        else {
+
+            reports = [...localReports];
+
+        }
+
+
+        // Prepare route analyses
         const routeAnalyses = routeData.routes.map(route => ({
             route,
             reports: []
         }));
 
+
+        // Assign each report to nearest route
         for (const report of reports) {
 
             let nearestRouteIndex = -1;
+
             let smallestDistance = Infinity;
 
             routeAnalyses.forEach((item, index) => {
@@ -435,23 +570,33 @@ app.get("/route", async (req, res) => {
                 );
 
                 if (distance < smallestDistance) {
+
                     smallestDistance = distance;
+
                     nearestRouteIndex = index;
                 }
 
             });
 
+
             if (
                 nearestRouteIndex !== -1 &&
                 smallestDistance <= REPORT_RADIUS_KM
             ) {
+
                 routeAnalyses[nearestRouteIndex].reports.push(report);
             }
         }
 
+
+        // Build final routes
         const routes = [];
 
-        for (let index = 0; index < routeAnalyses.length; index++) {
+        for (
+            let index = 0;
+            index < routeAnalyses.length;
+            index++
+        ) {
 
             const item = routeAnalyses[index];
 
@@ -463,6 +608,7 @@ app.get("/route", async (req, res) => {
             const roadInfo = await getOSMRoadInfo(
                 item.route.geometry
             );
+
 
             routes.push({
 
@@ -486,6 +632,7 @@ app.get("/route", async (req, res) => {
             });
         }
 
+
         res.json(routes);
 
     } catch (error) {
@@ -497,6 +644,11 @@ app.get("/route", async (req, res) => {
         });
     }
 });
+
+
+// ==============================
+// Start Server
+// ==============================
 
 app.listen(5000, "127.0.0.1", () => {
 
